@@ -42,10 +42,15 @@ public class RouteService {
                     BigDecimal longitudeConsumidor = new BigDecimal(usuarioEntity.getLatitude());
                     usuarioEntities.put(usuarioEntity,((int) (calculaDistancia(latitudeCatador.doubleValue(),longitudeCatador.doubleValue(), latitudeConsumidor.doubleValue(),longitudeConsumidor.doubleValue()))));
                 });
-        Set<UsuarioDTO> retorno = sortByValue(usuarioEntities).keySet().stream().map(consumidor -> {
+        List<UsuarioDTO> retorno = sortByValue(usuarioEntities).keySet().stream().map(consumidor -> {
             return UsuarioMapper.entityToDto(catadorEntity);
-        }).collect(Collectors.toSet());
+        }).collect(Collectors.toList()).subList(0,9);
 
+        retorno.parallelStream().forEach(usuarioDTO -> {
+            RotaEntity rotaEntity = rotaRepository.findByClienteId(usuarioDTO.getClienteId());
+            rotaEntity.setFlAtiva('N');
+            rotaRepository.save(rotaEntity);
+        });
         return ResponseEntity.ok().body(retorno);
     }
 
